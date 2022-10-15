@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Веб-интерфейс заказчика</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <!--    <link rel="stylesheet" type="text/css" href="css/bootstrap.css" />-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+
+    <link href="https://fonts.googleapis.com/css?family=Poppins:400,700&display=swap" rel="stylesheet">
+
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=ваш API-ключ&lang=ru_RU" type="text/javascript">
+    </script>
+
+    <script type="text/javascript" src="../../../script.js"></script>
+
+    <script>
+
+        var techType;
+        var techModel;
+
+        var statusDict = {
+            'WAITING' : 'Ожидание ответа водителя',
+            'ACCEPTED' : 'Заказ принят',
+            'IN_PROGRESS' : 'Заказ выполняется',
+            'COMPLETED' : 'Выполнен',
+            'FAILED' : 'Завершился неудачей'
+        }
+
+
+
+        function addAllOrders(id)
+        {
+            let xhr = new XMLHttpRequest()
+            xhr.open("GET","../order/ofCustomer/"+id)
+            xhr.send()
+            xhr.responseType="json"
+            xhr.onload = () => {
+                let div = document.getElementById("myOrders")
+                let vehicleOrders = xhr.response
+
+
+
+                for (let key in vehicleOrders)
+                {
+                    let obj = vehicleOrders[key]
+                    console.log("OBJ=",obj)
+                    let row = document.createElement("div")
+                    row.classList.add("row")
+                    div.appendChild(row)
+
+                    let col = document.createElement("div")
+                    col.classList.add("col-sm-6")
+
+                    let p = document.createElement("p")
+                    p.innerText = "ID заказа: " + obj.id
+
+
+                    let p2 = document.createElement("p")
+                    p2.innerText = obj.requiredModel.name
+
+                    let p3 = document.createElement("p")
+                    p3.innerText = statusDict[obj.status]
+
+                    let startDateTimeInput = document.createElement("input")
+                    startDateTimeInput.type="datetime-local"
+                    startDateTimeInput.value=obj.startOfWork
+                    startDateTimeInput.disabled=true
+
+                    let finishDateTimeInput = document.createElement("input")
+                    finishDateTimeInput.type="datetime-local"
+                    finishDateTimeInput.value=obj.finishOfWork
+                    finishDateTimeInput.disabled=true
+
+                    col.appendChild(p)
+                    col.appendChild(p2)
+                    col.appendChild(p3)
+                    col.appendChild(startDateTimeInput)
+                    col.appendChild(finishDateTimeInput)
+
+
+                    col.style.border = "1px solid black"
+                    row.appendChild(col)
+
+
+                }
+            }
+        }
+
+        function getAllTypes()
+        {
+            var xhr = new XMLHttpRequest()
+            xhr.open("GET","/vehicle/types")
+            xhr.send()
+            xhr.onload = () => {
+                console.log(xhr.response)
+                return xhr.response
+            }
+            return xhr.response
+        }
+
+        function getModelsByType(type)
+        {
+            var xhr = new XMLHttpRequest()
+            xhr.open("GET","/vehicle/models/byType/"+type)
+            xhr.send()
+            xhr.onload = () => {
+                console.log(xhr.response)
+                return xhr.response
+            }
+        }
+
+        function getOrdersByUserId(id)
+        {
+            var xhr = new XMLHttpRequest()
+            xhr.open("GET","/vehicleOrder/ofCustomer/"+id)
+            xhr.send()
+            xhr.onload = () => {
+                console.log(xhr.response)
+                return xhr.response
+            }
+        }
+
+        function addTypes()
+        {
+            var select = document.getElementById("types")
+            var types = getAllTypes()
+
+            var xhr = new XMLHttpRequest()
+            xhr.open("GET","/vehicle/types")
+            xhr.responseType="json"
+            xhr.send()
+            xhr.onload = () => {
+                let types = xhr.response
+                console.log(types)
+                select.onchange = (ev) => {
+                    addModels(ev.srcElement.value)
+                }
+                for (let key in types) {
+                    let obj = types[key]
+                    console.log("obj ",obj)
+                    let option = document.createElement("option")
+                    option.text = obj.name
+                    option.value = obj.id
+                    select.appendChild(option)
+                }
+            }
+        }
+
+        function addModels(typeId)
+        {
+            var select = document.getElementById("types")
+            var types = getAllTypes()
+
+            var xhr = new XMLHttpRequest()
+            xhr.open("GET","/vehicle/models/byType/"+typeId)
+            xhr.responseType="json"
+            xhr.send()
+            xhr.onload = () => {
+                let models = xhr.response
+                let select = document.getElementById("models")
+                for (let key in models)
+                {
+                    let obj = models[key]
+                    let option = document.createElement("option")
+                    option.value=obj.id
+                    option.text=obj.name
+                    select.appendChild(option)
+                }
+            }
+        }
+
+        function sendAddOrderByModel(customerId)
+        {
+            var form = document.getElementById("order-by-model")
+            var text = form.getElementsByTagName("input")[0].value
+            var fromDateTime = form.getElementsByTagName("input")[1].value
+            var toDateTime = form.getElementsByTagName("input")[2].value
+            var modelId = form.getElementsByTagName("select")[1].value
+            console.log("text = ",text,"  from = ",fromDateTime,"  to = ",toDateTime, " modelId = ",modelId)
+
+            var xhr = new XMLHttpRequest()
+            xhr.open("POST","../order/add?customerId="+customerId+"&startOfWork="+fromDateTime+"&finishOfWork="+toDateTime+"&requiredModelId="+modelId)
+            xhr.send()
+            xhr.responseType="json"
+            xhr.onload = () => {
+                if (xhr.status == 200)
+                {
+                    let id = xhr.response
+                    if (id == 0)
+                    {
+                        alert("Нет свободных водителей на это время")
+                    }
+                    else if (id==-1)
+                    {
+                        alert("Нет свободных машин на это время")
+                    }
+                    else
+                    {
+                        alert("Ваш заказ создан... Ждите, когда найдется водитель")
+                    }
+                }
+                else
+                {
+                    alert("Какая-то ошибка...")
+                }
+
+            }
+        }
+    </script>
+
+</head>
+<body>
+
+<div class="container">
+    <div class="card" style="margin: 20px; padding: 20px;">
+        <form id="order-by-model" method="post">
+            <p>Описание: </p><input type="text">
+            <p>Дата/время начала: </p><input type="datetime-local">
+            <p>Дата/время конца работ:</p> <input type="datetime-local">
+            <p>Тип техники: </p><select id="types"></select>
+            <p>Модель: </p><select id="models"></select>
+            <button class="btn btn-primary" onclick="sendAddOrderByModel(8); return false;">Заказать</button>
+        </form>
+    </div>
+
+    <div class="row" id="tech-access">
+        <script>
+            let div = getMonthHeatMap(7)
+            document.getElementById("tech-access").appendChild(div)
+        </script>
+    </div>
+
+    <div class="row" id="myOrders">
+        <script>
+            addAllOrders(8)
+        </script>
+    </div>
+    <div class="row" style="padding: 20px; margin: 20px;">
+        <div class="alert alert-info">
+            Активные заказы на карте
+        </div>
+        <div id="map" style="width: 600px; height: 400px"></div>
+    </div>
+
+    <script type="text/javascript">
+        // Функция ymaps.ready() будет вызвана, когда
+        // загрузятся все компоненты API, а также когда будет готово DOM-дерево.
+        ymaps.ready(init);
+        function init(){
+            // Создание карты.
+            var myMap = new ymaps.Map("map", {
+                // Координаты центра карты.
+                // Порядок по умолчанию: «широта, долгота».
+                // Чтобы не определять координаты центра карты вручную,
+                // воспользуйтесь инструментом Определение координат.
+                center: [55.76, 37.64],
+                // Уровень масштабирования. Допустимые значения:
+                // от 0 (весь мир) до 19.
+                zoom: 11
+            });
+
+            var xhr = new XMLHttpRequest()
+            xhr.open("GET","../request/ofCustomer/8")
+            xhr.responseType="json"
+            xhr.send()
+            xhr.onload = () => {
+                for (let key in xhr.response)
+                {
+                    let obj = xhr.response[key]
+                    console.log(obj)
+                    myMap.geoObjects.add(new ymaps.Placemark([obj.vehicleExemplar.latitude,obj.vehicleExemplar.longitude], {
+                        balloonContent: '<strong>'+obj.vehicleExemplar.model.name+'</strong>'+'<br>'+obj.vehicleExemplar.number
+                    }))
+                }
+            }
+
+
+        }
+    </script>
+
+</div>
+
+<script>
+    addTypes();
+</script>
+</body>
+</html>
