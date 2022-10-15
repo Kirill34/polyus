@@ -1,17 +1,12 @@
 package controller;
 
-import model.Request;
-import model.User;
-import model.VehicleExemplar;
-import model.VehicleOrder;
-import org.hibernate.type.LocalDateTimeType;
+import model.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import repo.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -37,6 +32,9 @@ public class RequestController {
 
     @org.springframework.beans.factory.annotation.Autowired(required=true)
     private OrderRepository orderRepository;
+
+    @org.springframework.beans.factory.annotation.Autowired(required=true)
+    private NoticeRepository noticeRepository;
 
 
     @GetMapping("/ofDriver/{driverId}")
@@ -120,6 +118,24 @@ public class RequestController {
         return true;
     }
 
+    @PostMapping("/{requestId}/broken")
+    public boolean broken(Long driverId, @PathVariable Long requestId, @DateTimeFormat(pattern = "dd.MM.yyyy HH:mm:ss") LocalDateTime dateTime)
+    {
+        List<Request> driverRequests = requestRepository.findAllByDriverId(driverId);
+        Request request = requestRepository.findById(requestId).get();
+        if (request.getDriver().getId() != driverId)
+            return false;
+        request.setStatus(Request.Status.IN_PROGRESS);
+        request.setRealFinishDateTime(dateTime);
+        request.getVehicleExemplar().setStatus(VehicleExemplar.Status.NEED_HELP);
+
+        NoticeForManager noticeForManager = new NoticeForManager("Автомобиль неисправен: "+request.getVehicleExemplar().getNumber()+" "+request.getVehicleExemplar().getModel().getName()+" Водитель: "+request.getDriver().getPhoneNumber(), request.getVehicleExemplar().getManager());
+        noticeRepository.save(noticeForManager);
+
+        requestRepository.save(request);
+        return true;
+    }
+
     @PostMapping("/{requestId}/sendCoordinates")
     public boolean sendCoordinates(Long driverId, @PathVariable Long requestId, double latitude, double longitude)
     {
@@ -154,7 +170,7 @@ public class RequestController {
     }
 
     @GetMapping("/forVehicle/{vehicleId}/forDay")
-    public List<Request> getForDay(@PathVariable Long vehicleId, @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDate date)
+    public List<Request> getForDay(@PathVariable Long vehicleId, @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date)
     {
         LocalDateTime startOfDay = LocalDateTime.now().minusHours(LocalDateTime.now().getHour()).minusMinutes(LocalDateTime.now().getMinute());
         LocalDateTime endOfDay = startOfDay.plusHours(23).plusMinutes(59);
@@ -197,7 +213,7 @@ public class RequestController {
     }
 
     @GetMapping("/forVehicle/{vehicleId}/byHourLoad")
-    public HashMap<Integer,Integer> getByHourLoad(@DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDate date, @PathVariable Long vehicleId)
+    public HashMap<Integer,Integer> getByHourLoad(@DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date, @PathVariable Long vehicleId)
     {
         HashMap<Integer,Integer> load = new HashMap<>();
         List<Request> requests = getForDay(vehicleId,date);

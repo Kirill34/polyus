@@ -1,20 +1,16 @@
 package controller;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import model.NoticeForManager;
 import model.User;
 import model.UserToken;
 import org.apache.commons.lang.RandomStringUtils;
-import org.hibernate.type.LocalDateTimeType;
-import org.springframework.boot.Banner;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import repo.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
 
@@ -36,6 +32,9 @@ public class UserController {
 
     @org.springframework.beans.factory.annotation.Autowired(required=true)
     private VehicleExemplarRepository vehicleExemplarRepository;
+
+    @org.springframework.beans.factory.annotation.Autowired(required=true)
+    private NoticeRepository noticeRepository;
 
     @PostMapping("/addDriver")
     public Long addDriver(String email, String phoneNumber, @DateTimeFormat(pattern = "dd.MM.yyyy") Date birthday, String password, String firstName, String secondName)
@@ -114,6 +113,12 @@ public class UserController {
     public ModelAndView getManagerPage(Model model)
     {
         return new ModelAndView("manager");
+    }
+
+    @GetMapping("/manager/{id}/notices")
+    public List<NoticeForManager> getManagerNotices(@PathVariable Long id)
+    {
+        return noticeRepository.findAllByForManagerIdAndRead(id,false);
     }
 
 
