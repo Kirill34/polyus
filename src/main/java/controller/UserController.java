@@ -115,10 +115,36 @@ public class UserController {
         return new ModelAndView("manager");
     }
 
+    @GetMapping("/driverPage")
+    public ModelAndView getDriverPage(Model model)
+    {
+        return new ModelAndView("driver");
+    }
+
     @GetMapping("/manager/{id}/notices")
     public List<NoticeForManager> getManagerNotices(@PathVariable Long id)
     {
-        return noticeRepository.findAllByForManagerIdAndRead(id,false);
+        List<NoticeForManager> notices = noticeRepository.findAllByForManagerIdAndIsRead(id,false);
+
+        for (NoticeForManager n: notices)
+        {
+            n.setRead(true);
+            noticeRepository.save(n);
+        }
+
+        return notices;
+    }
+
+    @GetMapping("/getFirstManager")
+    public Long getFirstManagerId()
+    {
+        return userRepository.findAllByType(User.UserType.MANAGER).get(0).getId();
+    }
+
+    @GetMapping("/getFirstCustomer")
+    public Long getFirstCustomerId()
+    {
+        return userRepository.findAllByType(User.UserType.CUSTOMER).get(0).getId();
     }
 
 

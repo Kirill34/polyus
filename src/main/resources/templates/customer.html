@@ -17,8 +17,20 @@
     </script>
 
     <script type="text/javascript" src="../../../script.js"></script>
-
     <script>
+
+        var myId = 0;
+        function initMyId()
+        {
+            let xhr = new XMLHttpRequest()
+            xhr.open("GET","../../../user/getFirstCustomer")
+            xhr.responseType="json"
+            xhr.send()
+            xhr.onload = () => {
+                myId=xhr.response
+            }
+        }
+        initMyId()
 
         var techType;
         var techModel;
@@ -211,33 +223,63 @@
 
             }
         }
+
+        function addExemplars()
+        {
+            let modelId = document.getElementById("models").value
+            let xhr = new XMLHttpRequest()
+            xhr.open("GET","/vehicle/exemplars/ofModel/"+modelId)
+            xhr.responseType="json"
+            xhr.send()
+            xhr.onload = () => {
+                let select = document.getElementById("vehicle-exemplar")
+                let exemplars = xhr.response
+                for (let key in exemplars)
+                {
+                    let option = document.createElement("option")
+                    option.text = exemplars[key].number
+                    option.value = exemplars[key].id
+
+                    select.appendChild(option)
+                }
+            }
+        }
     </script>
 
 </head>
 <body>
 
 <div class="container">
-    <div class="card" style="margin: 20px; padding: 20px;">
+    <div class="card" style="margin: 20px; padding: 20px; width: 18rem;">
+         <h5 class="card-title">Заказ конкретной модели</h5>
         <form id="order-by-model" method="post">
-            <p>Описание: </p><input type="text">
+            <div class="form-group row">
+                <p>Описание: </p>
+                <input type="text">
+            </div>
             <p>Дата/время начала: </p><input type="datetime-local">
             <p>Дата/время конца работ:</p> <input type="datetime-local">
             <p>Тип техники: </p><select id="types"></select>
-            <p>Модель: </p><select id="models"></select>
-            <button class="btn btn-primary" onclick="sendAddOrderByModel(8); return false;">Заказать</button>
+            <p>Модель: </p><select id="models" onclick="addExemplars(); return false;"></select>
+            <button class="btn btn-primary" onclick="sendAddOrderByModel(myId); return false;">Заказать</button>
         </form>
     </div>
 
     <div class="row" id="tech-access">
+        <h5>Календарь доступности техники</h5>
+        <select id="vehicle-exemplar" onclick="showHeatMap(); return false;"></select>
         <script>
-            let div = getMonthHeatMap(7)
-            document.getElementById("tech-access").appendChild(div)
+            function showHeatMap() {
+                let div = getMonthHeatMap(document.getElementById("vehicle-exemplar").value)
+                document.getElementById("tech-access").appendChild(div)
+            }
         </script>
     </div>
 
-    <div class="row" id="myOrders">
+    <div class="row" id="myOrders" style="margin:20px; border-radius: 10px; padding: 10px; height: 200px; overflow-y: scroll;">
+        <h5>История моих заказов</h5>
         <script>
-            addAllOrders(8)
+            addAllOrders(myId)
         </script>
     </div>
     <div class="row" style="padding: 20px; margin: 20px;">
@@ -265,7 +307,7 @@
             });
 
             var xhr = new XMLHttpRequest()
-            xhr.open("GET","../request/ofCustomer/8")
+            xhr.open("GET","../request/ofCustomer/"+myId)
             xhr.responseType="json"
             xhr.send()
             xhr.onload = () => {

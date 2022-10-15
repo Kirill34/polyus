@@ -13,7 +13,7 @@ public class VehicleOrder {
         this.startOfWork=startOfWork;
         this.finishOfWork=finishOfWork;
         this.requiredModel=requiredModel;
-        this.status=Status.WAITING;
+        this.status=Status.ACCEPTED;
     }
 
     public VehicleOrder(User customer, LocalDateTime startOfWork, LocalDateTime finishOfWork, VehicleType vehicleType, double minWidth, double minLength, double weight) {

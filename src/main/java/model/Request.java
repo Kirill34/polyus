@@ -51,7 +51,7 @@ public class Request {
         this.vehicleExemplar = vehicleExemplar;
         this.startDateTime = startDateTime;
         this.finishDateTime = finishDateTime;
-        this.status = Status.WAITING;
+        this.status = Status.ACCEPTED;
         this.vehicleOrder = vehicleOrder;
     }
 

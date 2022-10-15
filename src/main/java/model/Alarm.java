@@ -2,22 +2,23 @@ package model;
 
 import javax.persistence.*;
 
-@Table
 @Entity
-public class NoticeForManager {
+@Table
+public class Alarm {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id", nullable = false)
     private Long id;
 
-    public NoticeForManager(String text, User forManager)
+    public Alarm(User manager, String text)
     {
+        this.manager=manager;
         this.text=text;
-        this.forManager=forManager;
-        this.isRead =false;
+        this.read=false;
     }
 
-    public NoticeForManager() {
+    public Alarm()
+    {
 
     }
 
@@ -30,27 +31,27 @@ public class NoticeForManager {
     }
 
     public boolean isRead() {
-        return isRead;
+        return read;
     }
 
     public void setRead(boolean read) {
-        this.isRead = read;
+        this.read = read;
     }
 
     private String text;
 
-    private boolean isRead;
-
     @ManyToOne
-    @JoinColumn(name = "for_manager_id")
-    private User forManager;
+    @JoinColumn(name = "manager_id")
+    private User manager;
 
-    public User getForManager() {
-        return forManager;
+    private boolean read;
+
+    public User getManager() {
+        return manager;
     }
 
-    public void setForManager(User forManager) {
-        this.forManager = forManager;
+    public void setManager(User manager) {
+        this.manager = manager;
     }
 
     public Long getId() {

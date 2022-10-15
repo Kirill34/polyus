@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example</groupId>
-    <artifactId>vtb2</artifactId>
+    <artifactId>polyus</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>vtb2</name>
-    <description>vtb2</description>
+    <name>polyus</name>
+    <description>polyus</description>
     <properties>
         <java.version>11</java.version>
         <swagger.version>2.9.2</swagger.version>

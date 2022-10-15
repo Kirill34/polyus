@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Имитатор водителя</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+
+    <link href="https://fonts.googleapis.com/css?family=Poppins:400,700&display=swap" rel="stylesheet">
+
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=ваш API-ключ&lang=ru_RU" type="text/javascript">
+    </script>
+</head>
+<body>
+
+    <div class="container">
+        <div id="allAccepted" class="row">
+            <script>
+                function addAllAccepted()
+                {
+                    let xhr = new XMLHttpRequest()
+                    xhr.open("GET","../../../request/allAccepted")
+                    xhr.responseType="json"
+                    xhr.send()
+                    xhr.onload = () => {
+                        let requests = xhr.response
+                        for (let key in requests)
+                        {
+                            console.log(requests[key])
+                            let div = document.createElement("div")
+                            document.getElementById("allAccepted").appendChild(div)
+                            div.classList.add("card")
+
+                            let p = document.createElement("p")
+                            p.innerText="ID запроса: "+requests[key].id+" ID заказчика: "+  requests[key].customer.id
+                            div.appendChild(p)
+
+                            let inputDate = document.createElement("input")
+                            inputDate.type="datetime-local"
+
+                            div.appendChild(inputDate)
+
+                            let button = document.createElement("button")
+                            button.innerText="Начать работу"
+                            div.appendChild(button)
+                            button.classList.add("btn","btn-primary")
+                            button.onclick = () => {
+                                let xhr1 = new XMLHttpRequest()
+                                xhr1.open("POST","../../../request/"+requests[key].id+"/start?dateTime="+inputDate.value+"&driverId="+requests[key].driver.id)
+                                xhr1.responseType="json"
+                                xhr1.send()
+                                xhr1.onload = () => {
+                                    if (xhr1.status == 200)
+                                    {
+                                        alert("Успешно "+xhr1.response)
+                                    }
+                                    else
+                                    {
+                                        alert("Ошибка "+xhr1.status)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                addAllAccepted()
+            </script>
+        </div>
+        <div id="allInProgress" class="row">
+            <script>
+                function getAllInProgress()
+                {
+                    let allInProgress = document.getElementById("allInProgress")
+                    let xhr = new XMLHttpRequest()
+                    xhr.open("GET","../../../request/allInProgress")
+                    xhr.responseType="json"
+                    xhr.send()
+                    xhr.onload = () => {
+                        let requests = xhr.response
+                        for (let key in requests)
+                        {
+                            let driverId = requests[key].driver.id
+                            let requestId = requests[key].id
+
+                            let div = document.createElement("div")
+                            allInProgress.appendChild(div)
+                            document.getElementById("allAccepted").appendChild(div)
+                            div.classList.add("card")
+
+                            let p = document.createElement("p")
+                            p.innerText="ID запроса: "+requests[key].id+" ID заказчика: "+  requests[key].customer.id
+                            div.appendChild(p)
+
+                            let inputDate = document.createElement("input")
+                            inputDate.type="datetime-local"
+
+                            div.appendChild(inputDate)
+
+                            let buttonFinish = document.createElement("button")
+                            buttonFinish.classList.add("btn","btn-success")
+                            buttonFinish.innerText="Завершить"
+                            div.appendChild(buttonFinish)
+                            buttonFinish.onclick = () => {
+                                let xhr1 = new XMLHttpRequest()
+                                xhr1.open("POST","../../../request/"+requestId+"/finish?driverId="+driverId+"&dateTime="+inputDate.value)
+                                xhr1.responseType="json"
+                                xhr1.send()
+                                xhr1.onload = () => {
+                                    if (xhr1.status==200)
+                                    {
+                                        alert("Good: "+xhr1.response)
+                                    }
+                                    else
+                                    {
+                                        alert("Ошибка "+xhr1.status)
+                                    }
+                                }
+                            }
+
+                            let buttonDestroy = document.createElement("button")
+                            buttonDestroy.classList.add("btn","btn-danger")
+                            buttonDestroy.innerText="Поломка/ДТП"
+                            div.appendChild(buttonDestroy)
+                            buttonDestroy.onclick = () => {
+                                let xhr1 = new XMLHttpRequest()
+                                xhr1.open("POST","../../../request/"+requestId+"/broken?driverId="+driverId+"&dateTime="+inputDate.value)
+                                xhr1.responseType="json"
+                                xhr1.send()
+                                xhr1.onload = () => {
+                                    if (xhr1.status==200)
+                                    {
+                                        alert("Good: "+xhr1.response)
+                                    }
+                                    else
+                                    {
+                                        alert("Ошибка "+xhr1.status)
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
+                getAllInProgress()
+            </script>
+        </div>
+    </div>
+
+</body>
+</html>

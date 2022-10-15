@@ -14,6 +14,21 @@
     <link href="https://fonts.googleapis.com/css?family=Poppins:400,700&display=swap" rel="stylesheet">
     <script src="https://api-maps.yandex.ru/2.1/?apikey=ваш API-ключ&lang=ru_RU" type="text/javascript">
     </script>
+    <script src="../../../script.js"></script>
+    <script>
+        var myId = 0;
+        function initMyId()
+        {
+            let xhr = new XMLHttpRequest()
+            xhr.open("GET","../../../user/getFirstManager")
+            xhr.responseType="json"
+            xhr.send()
+            xhr.onload = () => {
+                myId=xhr.response
+            }
+        }
+        initMyId()
+    </script>
 </head>
 <body>
 <div class="container">
@@ -48,10 +63,40 @@
     </div>
 
      <div class="row">
-         <div class="col-sm-12">
-             <p>
-                 Уведомления
-             </p>
+         <div class="alert alert-danger">
+             Уведомления
+         </div>
+         <div id="notifications">
+             <script>
+                 function updateNotifications(managerId)
+                 {
+                     let xhr = new XMLHttpRequest()
+                     xhr.open("GET","../../user/manager/"+managerId+"/notices")
+                     xhr.responseType="json"
+                     xhr.send()
+                     xhr.onload = () => {
+                         if (xhr.status==200)
+                         {
+                             let notices = xhr.response
+                             console.log("Notices: ",notices)
+                             for (let key in notices)
+                             {
+                                 let p = document.createElement("div")
+                                 p.classList.add("alert","alert-danger")
+                                 p.innerText=notices[key].text
+                                 document.getElementById("notifications").appendChild(p)
+
+                                 ut1 = new SpeechSynthesisUtterance("Новое уведомление");
+                                 ut1.pitch = 1;  // пониже
+                                 ut1.rate = 2;   // побыстрее
+                                 speechSynthesis.speak(ut1);
+                             }
+                         }
+
+                     }
+                 }
+                 setInterval(() => {updateNotifications(myId)},3000)
+             </script>
          </div>
      </div>
 
@@ -66,7 +111,7 @@
                 {
                     let checkupBlock = document.getElementById("checkup-vehicles")
                     let xhr = new XMLHttpRequest()
-                    xhr.open("GET","../../vehicle/exemplars/forCheckup/ofManager/6")
+                    xhr.open("GET","../../vehicle/exemplars/forCheckup/ofManager/"+myId)
                     xhr.responseType="json"
                     xhr.send()
                     xhr.onload = () => {

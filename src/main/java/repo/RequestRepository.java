@@ -27,4 +27,5 @@ public interface RequestRepository extends CrudRepository<Request, Long> {
     public long countByDriverAndStatus(User driver, Request.Status status);
     public long countByDriverIdAndStatus(Long driver_id, Request.Status status);
     public List<Request> findAllByVehicleExemplarIdAndStartDateTimeBeforeAndFinishDateTimeAfter(Long vehicleExemplar_id, LocalDateTime startDateTime, LocalDateTime finishDateTime);
+    public List<Request> findAllByStatus(Request.Status status);
 }

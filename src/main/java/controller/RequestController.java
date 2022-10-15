@@ -88,7 +88,7 @@ public class RequestController {
     }
 
     @PostMapping("/{requestId}/start")
-    public boolean start(Long driverId, @PathVariable Long requestId, @DateTimeFormat(pattern = "dd.MM.yyyy HH:mm:ss") LocalDateTime dateTime)
+    public boolean start(Long driverId, @PathVariable Long requestId, @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime dateTime)
     {
         List<Request> driverRequests = requestRepository.findAllByDriverId(driverId);
         Request request = requestRepository.findById(requestId).get();//findById(requestId).get();
@@ -105,7 +105,7 @@ public class RequestController {
     }
 
     @PostMapping("/{requestId}/finish")
-    public boolean finish(Long driverId, @PathVariable Long requestId, @DateTimeFormat(pattern = "dd.MM.yyyy HH:mm:ss") LocalDateTime dateTime)
+    public boolean finish(Long driverId, @PathVariable Long requestId, @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime dateTime)
     {
         List<Request> driverRequests = requestRepository.findAllByDriverId(driverId);
         Request request = requestRepository.findById(requestId).get();
@@ -119,7 +119,7 @@ public class RequestController {
     }
 
     @PostMapping("/{requestId}/broken")
-    public boolean broken(Long driverId, @PathVariable Long requestId, @DateTimeFormat(pattern = "dd.MM.yyyy HH:mm:ss") LocalDateTime dateTime)
+    public boolean broken(Long driverId, @PathVariable Long requestId, @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime dateTime)
     {
         List<Request> driverRequests = requestRepository.findAllByDriverId(driverId);
         Request request = requestRepository.findById(requestId).get();
@@ -231,6 +231,18 @@ public class RequestController {
         }
 
         return load;
+    }
+
+    @GetMapping("/allAccepted")
+    public List<Request> getAllAccepted()
+    {
+        return requestRepository.findAllByStatus(Request.Status.ACCEPTED);
+    }
+
+    @GetMapping("/allInProgress")
+    public List<Request> getAllInProgress()
+    {
+        return requestRepository.findAllByStatus(Request.Status.IN_PROGRESS);
     }
 
 }

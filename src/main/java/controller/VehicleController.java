@@ -110,5 +110,11 @@ public class VehicleController {
         return exemplar;
     }
 
+    @GetMapping("/exemplars/ofModel/{id}")
+    public List<VehicleExemplar> getExemplarsOfModel(@PathVariable Long id)
+    {
+        return vehicleExemplarRepository.findAllByModelId(id);
+    }
+
 
 }
