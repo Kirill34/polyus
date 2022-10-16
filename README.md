@@ -10,7 +10,7 @@ git clone https://github.com/Kirill34/polyus
 ```
 4) перейти в папку /polyus и скомпилировать проект
 ```rb
-cd polys
+cd polyus
 ```
 
 При необходимости изменить логин/пароль от базы данных в файле /src/main/resources/application.properties
