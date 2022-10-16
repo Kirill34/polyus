@@ -244,13 +244,55 @@
                 }
             }
         }
+
+        function sendAddOderByCapacity()
+        {
+
+            var form = document.getElementById("order-by-capacity")
+            var text = form.getElementsByTagName("input")[0].value
+            var fromDateTime = form.getElementsByTagName("input")[1].value
+            var toDateTime = form.getElementsByTagName("input")[2].value
+            var capacity = form.getElementsByTagName("input")[3].value
+            let xhr = new XMLHttpRequest()
+            xhr.open("POST","../../../order/addByCapacty?startOfWork="+fromDateTime+"&finishOfWork="+toDateTime+"&capacity="+capacity+"&customerId="+myId)
+            xhr.send()
+            xhr.responseType="json"
+            xhr.onload = () => {
+                if (xhr.status == 200)
+                {
+                    let id = xhr.response
+                    if (id == 0)
+                    {
+                        alert("Нет свободных водителей на это время")
+                    }
+                    else if (id==-1)
+                    {
+                        alert("Нет свободных машин на это время")
+                    }
+                    else
+                    {
+                        alert("Ваш заказ создан... Ждите, когда найдется водитель")
+                    }
+                }
+                else
+                {
+                    alert("Какая-то ошибка...")
+                }
+
+            }
+        }
     </script>
 
 </head>
 <body>
 
 <div class="container">
-    <div class="card" style="margin: 20px; padding: 20px; width: 18rem;">
+
+    <div class="row">
+
+
+
+    <div class="card"  style="margin: 20px; padding: 20px; width: 18rem; float: left;">
          <h5 class="card-title">Заказ конкретной модели</h5>
         <form id="order-by-model" method="post">
             <div class="form-group row">
@@ -265,6 +307,38 @@
         </form>
     </div>
 
+
+    <div class="card" style="margin: 20px; padding: 20px; width: 18rem; float: left;">
+        <h5 class="card-title">Заказ  по грузоподъемности</h5>
+        <form id="order-by-capacity" method="post">
+            <div class="form-group row">
+                <p>Описание: </p>
+                <input type="text">
+            </div>
+            <p>Дата/время начала: </p><input type="datetime-local">
+            <p>Дата/время конца работ:</p> <input type="datetime-local">
+            <p>Масса груза:</p><input type="number" min="1" max="1000000">
+            <button class="btn btn-primary" onclick="sendAddOderByCapacity(); return false;">Заказать</button>
+        </form>
+    </div>
+
+
+    <div class="card"  style="margin: 20px; padding: 20px; width: 18rem; float: left;">
+        <h5 class="card-title" style="color: darkred;">Заказ техники на ЧП</h5>
+        <form id="order-emergency" method="post">
+            <div class="form-group row">
+                <p>Описание: </p>
+                <input type="text">
+            </div>
+            <p>Тип техники: </p><select id="types1"></select>
+            <p>Модель: </p><select id="models1" onclick="addExemplars(); return false;"></select>
+            <button class="btn btn-primary" onclick="sendAddOrderByModel(myId); return false;">Заказать</button>
+        </form>
+    </div>
+
+    </div>
+
+
     <div class="row" id="tech-access">
         <h5>Календарь доступности техники</h5>
         <select id="vehicle-exemplar" onclick="showHeatMap(); return false;"></select>
@@ -278,6 +352,9 @@
 
     <div class="row" id="myOrders" style="margin:20px; border-radius: 10px; padding: 10px; height: 200px; overflow-y: scroll;">
         <h5>История моих заказов</h5>
+        <button class="btn btn-secondary" onclick="addAllOrders(myId)">
+            Посмотреть
+        </button>
         <script>
             addAllOrders(myId)
         </script>

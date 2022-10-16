@@ -30,6 +30,35 @@ public class OrderController {
     @org.springframework.beans.factory.annotation.Autowired(required=true)
     private VehicleExemplarRepository vehicleExemplarRepository;
 
+    @PostMapping("/addByCapacty")
+    public Long addOderByCapacity(Long customerId, @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime startOfWork, @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime finishOfWork, double capacity)
+    {
+
+        User customer = userRepository.findById(customerId).get();
+        VehicleOrder vehicleOrder = new VehicleOrder(customer, startOfWork, finishOfWork, null, 0,0,capacity);
+        orderRepository.save(vehicleOrder);
+
+        List<User> drivers = userRepository.findFreeDrivers(startOfWork,finishOfWork);
+
+        if (drivers.isEmpty())
+            return new Long(0);
+
+        User driver0 = drivers.get(0);
+
+        List<VehicleExemplar> exemplars = vehicleExemplarRepository.findFreeVehicleExemplarsByCapacity(startOfWork,finishOfWork,(float)capacity);
+        if (exemplars.isEmpty())
+            return new Long(-1);
+
+        Request request = new Request(driver0, customer, exemplars.get(0), startOfWork, finishOfWork, vehicleOrder);
+        requestRepository.save(request);
+
+
+        return vehicleOrder.getId();
+
+
+        //return new Long(3);
+    }
+
     @PostMapping("/add")
     public Long addOrder(Long customerId, @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime startOfWork, @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime finishOfWork, Long requiredModelId)
     {

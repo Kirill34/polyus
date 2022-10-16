@@ -31,4 +31,10 @@ public interface VehicleExemplarRepository extends CrudRepository<VehicleExempla
 
     @Query("SELECT e FROM VehicleExemplar e WHERE e.model= ?3 AND e NOT IN (SELECT e FROM VehicleExemplar e INNER JOIN Request r on r.vehicleExemplar.id=e.id WHERE (r.status = 1 or r.status = 2) and (r.startDateTime between ?1 and ?2 or r.finishDateTime between ?1 and ?2)) ")
     public List<VehicleExemplar> findFreeVehicleExemplars(LocalDateTime startTime, LocalDateTime finishTime, VehicleModel model);
+
+
+    @Query("SELECT e FROM VehicleExemplar e WHERE e.model.loadCapacity >= ?3 AND e NOT IN (SELECT e FROM VehicleExemplar e INNER JOIN Request r on r.vehicleExemplar.id=e.id WHERE (r.status = 1 or r.status = 2) and (r.startDateTime between ?1 and ?2 or r.finishDateTime between ?1 and ?2)) ORDER BY e.model.fuelConsumptionHour ASC")
+    public List<VehicleExemplar> findFreeVehicleExemplarsByCapacity(LocalDateTime startTime, LocalDateTime finishTime, float minCapacity);
+
+
 }

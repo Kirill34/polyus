@@ -53,8 +53,8 @@ function getMonthHeatMap(vehicleId)
 
 
 
-           cell.style.width = "100px"
-           cell.style.height = "100px"
+           cell.style.width = "70px"
+           cell.style.height = "70px"
            cell.style.float="left"
            cell.appendChild(p)
 
